@@ -1,4 +1,4 @@
-flask
+pyeflask
 opensearch-py
 requests
 ipython

@@ -133,7 +133,7 @@ def index_file(file, index_name, reduced=False):
         docs_indexed += 1
         if docs_indexed % 200 == 0:
             bulk(client, docs, request_timeout=60)
-            #logger.info(f'{docs_indexed} documents indexed')
+            logger.info(f'{docs_indexed} documents indexed')
             docs = []
     if len(docs) > 0:
         bulk(client, docs, request_timeout=60)
