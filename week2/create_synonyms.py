@@ -1,9 +1,15 @@
 import fasttext
-
+import argparse
 
 if __name__ == '__main__':
 
-    threshold = 0.75
+    parser = argparse.ArgumentParser(description='Process some integers.')
+    general = parser.add_argument_group("general")
+    general.add_argument("--threshold", default=0.75,  help="Threshold for synonym similarity")
+    args = parser.parse_args()
+
+    threshold = args.threshold #0.75
+    print(threshold)
     model_path = "/workspace/datasets/fasttext/title_model.bin"
     top_words_path = "/workspace/datasets/fasttext/top_words.txt"
     output_file = "/workspace/datasets/fasttext/synonyms.csv"
@@ -12,14 +18,6 @@ if __name__ == '__main__':
 
     with open(top_words_path, 'r') as f:
         top_words = [x.strip() for x in f]
-
-    #print(top_words)
-    #nn = model.get_nearest_neighbors(top_words[0])
-    #nn_thresh = [x[1] for x in nn if x[0]]
-
-    #print(top_words[0])
-    #print(nn_thresh)
-    #dfasfds
     
     with open(output_file, 'w') as output:
         for word in top_words:
