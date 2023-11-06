@@ -46,9 +46,13 @@ parents_df = pd.DataFrame(list(zip(categories, parents)), columns =['category', 
 
 # Read the training data into pandas, only keeping queries with non-root categories in our category tree.
 queries_df = pd.read_csv(queries_file_name)[['category', 'query']]
-queries_df = queries_df[queries_df['category'].isin(categories)]
+queries_df_orig = queries_df[queries_df['category'].isin(categories)]
 
 # IMPLEMENT ME: Convert queries to lowercase, and optionally implement other normalization, like stemming.
+queries_df['query'] = queries_df_orig['query'].str.lower()
+queries_df['query'] = queries_df['query'].str.replace(r'[^a-z0-9\s]', ' ', regex=True)
+queries_df['query'] = queries_df['query'].str.replace(r'\s+', ' ', regex=True)
+queries_df['query'] = queries_df['query'].apply(lambda x: ' '.join([stemmer.stem(y) for y in str(x).split(' ')] ))
 
 # IMPLEMENT ME: Roll up categories to ancestors to satisfy the minimum number of queries per category.
 
