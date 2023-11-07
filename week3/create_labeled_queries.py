@@ -55,6 +55,51 @@ queries_df['query'] = queries_df['query'].str.replace(r'\s+', ' ', regex=True)
 queries_df['query'] = queries_df['query'].apply(lambda x: ' '.join([stemmer.stem(y) for y in str(x).split(' ')] ))
 
 # IMPLEMENT ME: Roll up categories to ancestors to satisfy the minimum number of queries per category.
+#queries_count = queries_df.groupby(["category"])["category"].count()
+#print(queries_count)
+
+#print(queries_count[queries_count['category'] == 'abcat0701001'])
+
+#queries_df['category_old'] = queries_df['category']
+
+# new try
+queries_merged = queries_df.merge(parents_df, on='category', how='inner').drop(columns=['parent'])
+
+while True:
+    queries_count = queries_merged.groupby(["category"], as_index=False).count()
+    threshold = 1000
+    df_thresh = queries_count[queries_count['query'] < threshold].sort_values(by='query')
+    print(len(df_thresh))
+    if len(df_thresh) == 0:
+        break    
+    df_thresh_parents = df_thresh.merge(parents_df,on='category', how='inner')[['category','parent']]
+    queries_merged = queries_merged.merge(df_thresh_parents, on='category', how='left')
+    queries_merged['category'] = queries_merged['parent'].fillna(queries_merged['category'])
+    queries_merged = queries_merged.drop(columns=['parent'])
+
+queries_df = queries_merged
+
+#asdf
+#dropped_list = []
+#while True:
+#    queries_count = queries_df.groupby(["category"], as_index=False).count()
+#    df_thresh = queries_count[queries_count['query'] < threshold].sort_values(by='query')
+#    df_thresh = df_thresh[~df_thresh['category'].isin(dropped_list)]
+#    print(len(df_thresh))
+#    if len(df_thresh) < 1:
+#        break
+#    cat = df_thresh.iloc[0]['category']
+#    dropped_list.append(cat)
+#
+#    parents_df_cat = parents_df[parents_df['category']==cat]['parent']    
+#    if len(parents_df_cat) < 1:
+#        print(f'{cat} does not have parent')
+#        continue
+#    parent_id = parents_df[parents_df['category']==cat]['parent'].iloc[0]
+#    queries_df.loc[queries_df['category'] == cat,'category'] = parent_id
+
+#print(queries_df)
+#asdsd
 
 # Create labels in fastText format.
 queries_df['label'] = '__label__' + queries_df['category']
