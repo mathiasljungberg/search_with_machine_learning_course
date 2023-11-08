@@ -11,7 +11,8 @@ from urllib.parse import urljoin
 import pandas as pd
 import fileinput
 import logging
-
+import fasttext
+import numpy as np
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -188,9 +189,24 @@ def create_query(user_query, click_prior_query, filters, sort="_score", sortDir=
 
 def search(client, user_query, index="bbuy_products", sort="_score", sortDir="desc"):
     #### W3: classify the query
+    model_path = "/workspace/datasets/fasttext/query_model.bin"
+    model = fasttext.load_model(model_path)
+    res = model.predict(user_query, k=10)
+
+    cum_scores = np.cumsum(res[1])
+    inds = np.where(cum_scores > 0.7)[0]
+
     #### W3: create filters and boosts
+    filters =None
+    if len(inds)>0:
+        ind = inds[0] +1
+        categories = [ x.replace('__label__', '') for x in res[0][:ind]] 
+        filters = [ { "terms":  { "categoryPathIds": categories }}]
+    print(cum_scores)
+    print(filters)
+
     # Note: you may also want to modify the `create_query` method above
-    query_obj = create_query(user_query, click_prior_query=None, filters=None, sort=sort, sortDir=sortDir, source=["name", "shortDescription"])
+    query_obj = create_query(user_query, click_prior_query=None, filters=filters, sort=sort, sortDir=sortDir, source=["name", "shortDescription", "categoryPath", "categoryPathIds"])
     logging.info(query_obj)
     response = client.search(query_obj, index=index)
     if response and response['hits']['hits'] and len(response['hits']['hits']) > 0:
