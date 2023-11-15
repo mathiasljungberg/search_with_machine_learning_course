@@ -213,9 +213,7 @@ def search(client, user_query, index="bbuy_products", sort="_score", sortDir="de
     #### W3: create filters and boosts
     # Note: you may also want to modify the `create_query` method above
     if vector_search:
-      print("using vector query")
       query_obj = create_vector_query(user_query)
-      print(query_obj)
     else:
       query_obj = create_query(user_query, click_prior_query=None, filters=None, sort=sort, sortDir=sortDir, source=["name", "shortDescription"])
 
@@ -253,7 +251,6 @@ if __name__ == "__main__":
 
     host = args.host
     port = args.port
-    print(args.vector)
 
     vector_search = args.vector
     if args.user:
@@ -275,7 +272,7 @@ if __name__ == "__main__":
     )
     index_name = args.index
     query_prompt = "\nEnter your query (type 'Exit' to exit or hit ctrl-c):"
-    #print(query_prompt)
+
     line = input()
     query = line.rstrip()
     search(client=opensearch, user_query=query, index=index_name, vector_search=vector_search)
